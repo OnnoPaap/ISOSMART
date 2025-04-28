@@ -1,0 +1,14 @@
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /opt/html:/var/www/html
+      - /etc/letsencrypt/live/data.15926.xyz/fullchain.pem:/etc/ssl/certs/fullchain.pem
+      - /etc/letsencrypt/live/data.15926.xyz/privkey.pem:/etc/ssl/certs/privkey.pem
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html
+    command: /bin/bash -c "a2ensite default-ssl && apache2-foreground"

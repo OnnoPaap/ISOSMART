@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple JSON Test</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Simple JSON Test</h1>
+    <button id="fetchData">Fetch Data</button>
+    <pre id="results"></pre>
+
+    <script>
+        $(document).ready(function() {
+            $('#fetchData').click(function() {
+                const endpointUrl = 'https://data.15926.xyz/sparql';
+                const query = encodeURIComponent('select count(*) where {?s ?p ?o}');
+                const defaultGraphUri = encodeURIComponent('http://data.15926.org/rdl');
+                //const format = encodeURIComponent('application/sparql-results+json');
+                const format = encodeURIComponent('json');
+                const url = `${endpointUrl}?default-graph-uri=${defaultGraphUri}&query=${query}&format=${format}&output=json&_cacheBuster=${new Date().getTime()}`;
+
+                $.ajax({
+                    url: url,
+                    dataType: 'jsonp',
+                    success: function(data) {
+                        $('#results').text(JSON.stringify(data, null, 2));
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', status, error);
+                        console.log(xhr);
+
+                        var responseText = xhr.responseText;
+                        var jsonStartIndex = responseText.indexOf('{');
+                        var jsonEndIndex = responseText.lastIndexOf('}') + 1;
+                        if (jsonStartIndex !== -1 && jsonEndIndex !== -1) {
+                            var jsonResponse = responseText.substring(jsonStartIndex, jsonEndIndex);
+                            try {
+                                var data = JSON.parse(jsonResponse);
+                                $('#results').text(JSON.stringify(data, null, 2));
+                            } catch (e) {
+                                $('#results').text('Error parsing JSON response: ' + e);
+                            }
+                        } else {
+                            $('#results').text('Error: ' + status + ' - ' + error + '\nStatus Code: ' + xhr.status + '\nStatus Text: ' + xhr.statusText + '\nResponse Text: ' + xhr.responseText);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
